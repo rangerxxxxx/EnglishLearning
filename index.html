@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
+<title>宝宝英语启蒙台</title>
+<style>
+  :root{
+    --bg:#FFF8E1; --card:#FFFFFF; --ink:#37474F; --muted:#90A4AE;
+    --coral:#FF8A65; --sky:#4FC3F7; --green:#66BB6A; --yellow:#FFD54F;
+    --purple:#BA68C8; --red:#EF5350; --line:#FFE0B2;
+    --radius:22px; --shadow:0 6px 20px rgba(255,138,101,.15);
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;padding:0;}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Microsoft YaHei",sans-serif;
+    background:var(--bg); color:var(--ink);
+    font-size:18px; line-height:1.5;
+  }
+  header{
+    position:sticky; top:0; z-index:20;
+    background:linear-gradient(135deg,var(--coral),var(--yellow));
+    padding:14px 16px calc(14px + env(safe-area-inset-top));
+    box-shadow:0 3px 12px rgba(0,0,0,.08);
+  }
+  .brand{display:flex; align-items:center; gap:10px; color:#fff; font-weight:800; font-size:22px;}
+  .brand svg{width:34px;height:34px;}
+  .tabs{display:flex; gap:10px; margin-top:12px;}
+  .tab{
+    flex:1; min-height:50px; border:none; border-radius:16px;
+    background:rgba(255,255,255,.35); color:#fff; font-weight:800; font-size:18px;
+    cursor:pointer; transition:.2s;
+  }
+  .tab.active{background:#fff; color:var(--coral); box-shadow:var(--shadow);}
+  main{padding:16px 16px calc(40px + env(safe-area-inset-bottom)); max-width:760px; margin:0 auto;}
+  .section-title{font-size:20px; font-weight:800; margin:22px 4px 12px; display:flex; align-items:center; gap:8px;}
+  .section-title svg{width:26px;height:26px;}
+
+  /* 今日任务 banner */
+  .today-banner{
+    background:linear-gradient(135deg,#FFF3E0,#FFE0B2);
+    border:3px dashed var(--coral); border-radius:var(--radius);
+    padding:16px; margin-bottom:6px;
+  }
+  .today-banner h2{margin:0 0 8px; font-size:20px; display:flex; align-items:center; gap:8px;}
+  .today-banner h2 svg{width:26px;height:26px;}
+  .overdue-chip{
+    display:inline-flex; align-items:center; gap:6px; background:#FFEBEE; color:var(--red);
+    border:2px solid var(--red); border-radius:14px; padding:6px 12px; margin:4px 4px 0 0;
+    font-weight:800; font-size:16px;
+  }
+  .today-chip{
+    display:inline-flex; align-items:center; gap:6px; background:#E3F2FD; color:var(--sky);
+    border:2px solid var(--sky); border-radius:14px; padding:6px 12px; margin:4px 4px 0 0;
+    font-weight:800; font-size:16px;
+  }
+  .big-btn{
+    min-height:54px; border:none; border-radius:18px; padding:0 22px;
+    font-size:20px; font-weight:800; color:#fff; cursor:pointer; background:var(--green);
+    box-shadow:var(--shadow); margin-top:12px; width:100%;
+  }
+  .big-btn.coral{background:var(--coral);}
+  .big-btn.sky{background:var(--sky);}
+  .big-btn:active{transform:scale(.97);}
+
+  /* 翻转卡片 */
+  .card-scroll{display:flex; gap:14px; overflow-x:auto; padding:6px 4px 16px; scroll-snap-type:x mandatory;}
+  .card-scroll::-webkit-scrollbar{height:8px;}
+  .card-scroll::-webkit-scrollbar-thumb{background:var(--line); border-radius:8px;}
+  .flip{
+    flex:0 0 78%; max-width:300px; scroll-snap-align:center;
+    perspective:1000px; background:transparent; border:none; padding:0; cursor:pointer;
+  }
+  .flip-inner{position:relative; width:100%; height:300px; transition:transform .5s; transform-style:preserve-3d;}
+  .flip.flipped .flip-inner{transform:rotateY(180deg);}
+  .face{
+    position:absolute; inset:0; backface-visibility:hidden; -webkit-backface-visibility:hidden;
+    border-radius:var(--radius); background:var(--card); box-shadow:var(--shadow);
+    display:flex; flex-direction:column; align-items:center; justify-content:center; padding:14px;
+    border:3px solid var(--line);
+  }
+  .face .pic{width:170px; height:170px;}
+  .face .zh{font-size:30px; font-weight:800; margin-top:6px;}
+  .face.back{transform:rotateY(180deg); background:linear-gradient(135deg,var(--sky),var(--purple)); border-color:#fff;}
+  .face.back .en{font-size:40px; font-weight:900; color:#fff; letter-spacing:1px;}
+  .face.back .tip{color:#fff; opacity:.9; font-size:15px; margin-top:8px;}
+  .learn-btn{
+    min-height:50px; border:none; border-radius:16px; background:var(--green); color:#fff;
+    font-size:19px; font-weight:800; width:100%; margin-top:10px; cursor:pointer;
+  }
+  .learn-btn.done{background:#CFD8DC; color:#607D8B;}
+  .learn-btn:active{transform:scale(.97);}
+
+  /* 练习 */
+  .quiz-card{background:var(--card); border-radius:var(--radius); box-shadow:var(--shadow); padding:18px; border:3px solid var(--line);}
+  .quiz-pic{width:160px;height:160px;margin:0 auto 14px; display:block;}
+  .quiz-q{text-align:center; font-weight:800; font-size:18px; color:var(--muted); margin-bottom:14px;}
+  .opt-row{display:grid; grid-template-columns:1fr 1fr; gap:12px;}
+  .opt{
+    min-height:58px; border:3px solid var(--line); border-radius:16px; background:#FFF;
+    font-size:22px; font-weight:800; color:var(--ink); cursor:pointer;
+  }
+  .opt:active{transform:scale(.97);}
+  .opt.right{background:var(--green); color:#fff; border-color:var(--green);}
+  .opt.wrong{background:var(--red); color:#fff; border-color:var(--red);}
+  .opt:disabled{cursor:default;}
+  .feedback{text-align:center; font-size:20px; font-weight:800; margin-top:14px; min-height:28px;}
+
+  /* 闯关积分 */
+  .level-row{display:flex; align-items:center; gap:16px; background:var(--card); border-radius:var(--radius); box-shadow:var(--shadow); padding:16px; border:3px solid var(--line);}
+  .ring{position:relative; width:120px; height:120px; flex:0 0 120px;}
+  .ring .pct{position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center;}
+  .ring .pct b{font-size:26px;}
+  .ring .pct span{font-size:13px; color:var(--muted);}
+  .stat{flex:1;}
+  .stat .pts{font-size:30px; font-weight:900; color:var(--coral);}
+  .stat .lvl{font-size:17px; color:var(--muted); margin-top:4px;}
+  .stars{font-size:22px; letter-spacing:2px; margin-top:6px; color:var(--yellow);}
+  .reward{background:var(--card); border-radius:18px; box-shadow:var(--shadow); padding:14px; border:3px solid var(--line); display:flex; align-items:center; gap:12px; margin-bottom:12px;}
+  .reward .ico{width:46px;height:46px;flex:0 0 46px;}
+  .reward .info{flex:1;}
+  .reward .info b{font-size:18px;}
+  .reward .info div{font-size:14px; color:var(--muted);}
+  .reward .cost{background:var(--yellow); color:#5D4037; border-radius:12px; padding:4px 10px; font-weight:800; font-size:15px;}
+  .reward button{min-height:50px; border:none; border-radius:14px; background:var(--purple); color:#fff; font-weight:800; font-size:16px; padding:0 16px; cursor:pointer;}
+  .reward button:disabled{background:#CFD8DC; color:#90A4AE;}
+
+  /* 家长模式 */
+  .panel{background:var(--card); border-radius:var(--radius); box-shadow:var(--shadow); padding:16px; border:3px solid var(--line); margin-bottom:16px;}
+  .panel h3{margin:0 0 12px; font-size:19px; display:flex; align-items:center; gap:8px;}
+  .row{display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin-bottom:10px;}
+  label{font-size:15px; color:var(--muted); display:block; margin:8px 0 4px;}
+  input,select{
+    min-height:50px; border:2px solid var(--line); border-radius:14px; padding:0 14px;
+    font-size:17px; width:100%; background:#FFFDF7; color:var(--ink);
+  }
+  input:focus,select:focus{outline:none; border-color:var(--coral);}
+  .mini-btn{min-height:50px; border:none; border-radius:14px; background:var(--sky); color:#fff; font-weight:800; font-size:16px; padding:0 18px; cursor:pointer;}
+  .mini-btn.green{background:var(--green);}
+  .mini-btn.coral{background:var(--coral);}
+  .mini-btn.ghost{background:#ECEFF1; color:var(--ink);}
+  .mini-btn:active{transform:scale(.97);}
+  .data-btns{display:grid; grid-template-columns:1fr 1fr; gap:10px;}
+  .warn{background:#FFF3E0; border:2px solid var(--yellow); border-radius:14px; padding:10px 12px; font-size:15px; color:#5D4037; margin-bottom:12px;}
+  .danger{background:#FFEBEE; border:2px solid var(--red); border-radius:14px; padding:12px; margin-top:6px;}
+  .bar-row{display:flex; align-items:flex-end; gap:8px; height:120px; padding:8px 0;}
+  .bar{flex:1; background:var(--sky); border-radius:8px 8px 0 0; position:relative; min-width:10px;}
+  .bar span{position:absolute; bottom:-22px; left:0; right:0; text-align:center; font-size:12px; color:var(--muted);}
+
+  .redeem-item{background:#F1F8E9; border:2px solid var(--green); border-radius:14px; padding:12px; margin-bottom:10px; display:flex; align-items:center; gap:10px;}
+  .redeem-item .info{flex:1; font-size:16px;}
+  .redeem-item button{min-height:46px; border:none; border-radius:12px; background:var(--green); color:#fff; font-weight:800; padding:0 14px; cursor:pointer;}
+  .redeem-item button.no{background:var(--red);}
+
+  .toast{position:fixed; left:50%; bottom:calc(30px + env(safe-area-inset-bottom)); transform:translateX(-50%); background:var(--ink); color:#fff; padding:12px 22px; border-radius:30px; font-weight:800; font-size:17px; z-index:99; opacity:0; transition:.3s; pointer-events:none; box-shadow:var(--shadow);}
+  .toast.show{opacity:1;}
+
+  .modal-mask{position:fixed; inset:0; background:rgba(0,0,0,.45); z-index:50; display:flex; align-items:center; justify-content:center; padding:20px;}
+  .modal{background:#fff; border-radius:20px; padding:22px; width:100%; max-width:380px; box-shadow:var(--shadow);}
+  .modal h3{margin:0 0 14px; font-size:20px;}
+  .modal p{font-size:15px; color:var(--muted); margin:0 0 16px;}
+  .hidden{display:none !important;}
+  .small{font-size:14px; color:var(--muted);}
+</style>
+</head>
+<body>
+<header>
+  <div class="brand">
+    <svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="46" fill="#fff" opacity=".25"/><text x="50" y="66" font-size="46" text-anchor="middle" fill="#fff" font-weight="900">A</text></svg>
+    宝宝英语启蒙台
+  </div>
+  <div class="tabs">
+    <button class="tab active" id="tabChild" onclick="showView('child')"><svg viewBox="0 0 100 100" width="22" height="22" style="vertical-align:-4px"><circle cx="50" cy="40" r="26" fill="#fff"/><circle cx="40" cy="36" r="4" fill="#FF8A65"/><circle cx="60" cy="36" r="4" fill="#FF8A65"/><circle cx="50" cy="48" r="5" fill="#FF8A65"/><rect x="30" y="66" width="40" height="26" rx="10" fill="#fff"/></svg> 宝宝模式</button>
+    <button class="tab" id="tabParent" onclick="showView('parent')"><svg viewBox="0 0 100 100" width="22" height="22" style="vertical-align:-4px"><path d="M30 30 L60 30 L66 44 L40 44 Z" fill="#fff"/><rect x="40" y="44" width="26" height="26" rx="4" fill="#fff"/><rect x="56" y="50" width="14" height="8" rx="2" fill="#FF8A65"/></svg> 家长模式</button>
+  </div>
+</header>
+
+<main id="childView"></main>
+<main id="parentView" class="hidden"></main>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ============ 基础工具 ============ */
+const PREFIX='wb_enkid_';
+function lsGet(k,def){try{const v=localStorage.getItem(PREFIX+k);return v?JSON.parse(v):def;}catch(e){return def;}}
+function lsSet(k,v){localStorage.setItem(PREFIX+k,JSON.stringify(v));}
+function todayStr(off){const d=new Date();d.setDate(d.getDate()+(off||0));return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
+function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('show'),1600);}
+
+/* ============ 单词插图（内联SVG） ============ */
+function S(inner){return '<svg viewBox="0 0 100 100" width="100%" height="100%">'+inner+'</svg>';}
+const ILLUS={
+  cat:S('<polygon points="24,32 30,8 46,30" fill="#FFB74D"/><polygon points="76,32 70,8 54,30" fill="#FFB74D"/><ellipse cx="50" cy="56" rx="33" ry="30" fill="#FFB74D"/><circle cx="40" cy="54" r="5" fill="#3E2723"/><circle cx="60" cy="54" r="5" fill="#3E2723"/><polygon points="46,64 54,64 50,70" fill="#E64A19"/><path d="M50 70 V78 M30 60 H14 M70 60 H86" stroke="#3E2723" stroke-width="2" fill="none"/>'),
+  dog:S('<ellipse cx="50" cy="56" rx="33" ry="30" fill="#A1887F"/><ellipse cx="22" cy="46" rx="11" ry="20" fill="#8D6E63"/><ellipse cx="78" cy="46" rx="11" ry="20" fill="#8D6E63"/><circle cx="40" cy="54" r="5" fill="#3E2723"/><circle cx="60" cy="54" r="5" fill="#3E2723"/><ellipse cx="50" cy="66" rx="9" ry="7" fill="#5D4037"/><path d="M50 73 q6 8 12 0" stroke="#E64A19" stroke-width="5" fill="none" stroke-linecap="round"/>'),
+  fish:S('<ellipse cx="46" cy="50" rx="30" ry="20" fill="#4FC3F7"/><polygon points="74,50 96,32 96,68" fill="#29B6F6"/><circle cx="34" cy="46" r="5" fill="#fff"/><circle cx="33" cy="46" r="2.5" fill="#000"/><path d="M20 50 q10 8 20 0" stroke="#0288D1" stroke-width="3" fill="none"/>'),
+  bird:S('<circle cx="50" cy="52" r="26" fill="#FFF176"/><circle cx="40" cy="46" r="5" fill="#000"/><polygon points="22,52 6,48 22,58" fill="#FB8C00"/><path d="M50 60 q14 -2 22 10" stroke="#FFB300" stroke-width="5" fill="none" stroke-linecap="round"/><path d="M30 72 q20 14 40 0" stroke="#FBC02D" stroke-width="4" fill="none"/>'),
+  rabbit:S('<ellipse cx="50" cy="60" rx="28" ry="26" fill="#F8BBD0"/><ellipse cx="38" cy="22" rx="8" ry="22" fill="#F8BBD0"/><ellipse cx="62" cy="22" rx="8" ry="22" fill="#F8BBD0"/><circle cx="42" cy="56" r="4.5" fill="#3E2723"/><circle cx="58" cy="56" r="4.5" fill="#3E2723"/><polygon points="47,66 53,66 50,71" fill="#EC407A"/><circle cx="34" cy="64" r="5" fill="#F48FB1"/><circle cx="66" cy="64" r="5" fill="#F48FB1"/>'),
+  duck:S('<ellipse cx="52" cy="62" rx="30" ry="22" fill="#FFEE58"/><circle cx="46" cy="38" r="18" fill="#FFF176"/><polygon points="60,38 84,40 60,46" fill="#FB8C00"/><circle cx="42" cy="34" r="3.5" fill="#000"/><path d="M30 70 q22 12 44 0" stroke="#FBC02D" stroke-width="4" fill="none"/>'),
+  cow:S('<ellipse cx="50" cy="56" rx="32" ry="28" fill="#EEEEEE"/><polygon points="26,30 20,10 38,26" fill="#BDBDBD"/><polygon points="74,30 80,10 62,26" fill="#BDBDBD"/><ellipse cx="40" cy="54" rx="7" ry="9" fill="#9E9E9E"/><ellipse cx="60" cy="54" rx="7" ry="9" fill="#9E9E9E"/><ellipse cx="50" cy="64" rx="10" ry="8" fill="#F48FB1"/><circle cx="40" cy="50" r="4" fill="#000"/><circle cx="60" cy="50" r="4" fill="#000"/>'),
+  pig:S('<ellipse cx="50" cy="54" rx="31" ry="28" fill="#F8BBD0"/><ellipse cx="30" cy="30" rx="10" ry="12" fill="#F48FB1"/><ellipse cx="70" cy="30" rx="10" ry="12" fill="#F48FB1"/><ellipse cx="50" cy="62" rx="13" ry="10" fill="#F06292"/><circle cx="45" cy="62" r="3" fill="#AD1457"/><circle cx="55" cy="62" r="3" fill="#AD1457"/><circle cx="40" cy="48" r="4" fill="#000"/><circle cx="60" cy="48" r="4" fill="#000"/>'),
+  apple:S('<path d="M50 30 C40 18 22 22 22 42 C22 64 38 82 50 82 C62 82 78 64 78 42 C78 22 60 18 50 30 Z" fill="#EF5350"/><rect x="47" y="14" width="6" height="16" rx="3" fill="#795548"/><path d="M53 22 q14 -8 18 4" stroke="#66BB6A" stroke-width="5" fill="none" stroke-linecap="round"/>'),
+  banana:S('<path d="M24 30 q-8 30 18 50 q10 -4 6 -14 q-20 -18 -10 -42 q-8 -2 -14 6 Z" fill="#FFEE58" stroke="#FBC02D" stroke-width="3"/><path d="M24 30 q4 -8 14 -8" stroke="#795548" stroke-width="4" fill="none"/>'),
+  orange:S('<circle cx="50" cy="56" r="30" fill="#FFA726"/><path d="M50 28 q-6 -10 4 -14" stroke="#66BB6A" stroke-width="5" fill="none" stroke-linecap="round"/><circle cx="42" cy="50" r="3" fill="#E65100"/><circle cx="58" cy="58" r="3" fill="#E65100"/><circle cx="50" cy="66" r="3" fill="#E65100"/>'),
+  pear:S('<path d="M50 24 C44 24 42 34 44 42 C30 46 28 70 44 80 C60 86 74 70 68 50 C66 42 58 30 56 26 C54 22 52 24 50 24 Z" fill="#AED581"/><rect x="47" y="14" width="6" height="14" rx="3" fill="#795548"/>'),
+  sun:S('<circle cx="50" cy="50" r="20" fill="#FFCA28"/><g stroke="#FFCA28" stroke-width="5" stroke-linecap="round"><line x1="50" y1="8" x2="50" y2="20"/><line x1="50" y1="80" x2="50" y2="92"/><line x1="8" y1="50" x2="20" y2="50"/><line x1="80" y1="50" x2="92" y2="50"/><line x1="20" y1="20" x2="28" y2="28"/><line x1="72" y1="72" x2="80" y2="80"/><line x1="80" y1="20" x2="72" y2="28"/><line x1="28" y1="72" x2="20" y2="80"/></g>'),
+  star:S('<polygon points="50,10 61,38 92,38 67,58 77,88 50,70 23,88 33,58 8,38 39,38" fill="#FFD54F" stroke="#FFB300" stroke-width="3"/>'),
+  ball:S('<circle cx="50" cy="50" r="32" fill="#E53935"/><path d="M50 18 A32 32 0 0 1 50 82" stroke="#fff" stroke-width="5" fill="none"/><path d="M18 50 A32 32 0 0 1 82 50" stroke="#fff" stroke-width="5" fill="none"/><circle cx="50" cy="50" r="9" fill="#fff"/>'),
+  book:S('<rect x="22" y="24" width="56" height="52" rx="6" fill="#42A5F5"/><rect x="22" y="24" width="12" height="52" rx="4" fill="#1E88E5"/><line x1="40" y1="36" x2="70" y2="36" stroke="#fff" stroke-width="4"/><line x1="40" y1="48" x2="70" y2="48" stroke="#fff" stroke-width="4"/><line x1="40" y1="60" x2="64" y2="60" stroke="#fff" stroke-width="4"/>'),
+  car:S('<rect x="18" y="44" width="64" height="22" rx="10" fill="#EF5350"/><path d="M30 44 q8 -16 22 -16 q14 0 20 16 Z" fill="#E53935"/><circle cx="34" cy="70" r="9" fill="#37474F"/><circle cx="66" cy="70" r="9" fill="#37474F"/><circle cx="34" cy="70" r="4" fill="#B0BEC5"/><circle cx="66" cy="70" r="4" fill="#B0BEC5"/>'),
+  red:S('<rect x="16" y="16" width="68" height="68" rx="14" fill="#EF5350"/><text x="50" y="66" font-size="40" text-anchor="middle" fill="#fff" font-weight="900">红</text>'),
+  blue:S('<rect x="16" y="16" width="68" height="68" rx="14" fill="#42A5F5"/><text x="50" y="66" font-size="40" text-anchor="middle" fill="#fff" font-weight="900">蓝</text>'),
+  yellow:S('<rect x="16" y="16" width="68" height="68" rx="14" fill="#FFCA28"/><text x="50" y="66" font-size="40" text-anchor="middle" fill="#fff" font-weight="900">黄</text>'),
+  green:S('<rect x="16" y="16" width="68" height="68" rx="14" fill="#66BB6A"/><text x="50" y="66" font-size="40" text-anchor="middle" fill="#fff" font-weight="900">绿</text>')
+};
+function illusOf(en){
+  const key=(en||'').toLowerCase().trim();
+  if(ILLUS[key]) return ILLUS[key];
+  const ch=(en||'?').charAt(0).toUpperCase();
+  return S('<circle cx="50" cy="50" r="34" fill="#BA68C8"/><text x="50" y="64" font-size="40" text-anchor="middle" fill="#fff" font-weight="900">'+ch+'</text>');
+}
+
+/* ============ 状态初始化 ============ */
+const DEFAULT_BANK=[
+  {id:'cat',en:'cat',zh:'猫',cat:'动物'},
+  {id:'dog',en:'dog',zh:'狗',cat:'动物'},
+  {id:'fish',en:'fish',zh:'鱼',cat:'动物'},
+  {id:'bird',en:'bird',zh:'鸟',cat:'动物'},
+  {id:'rabbit',en:'rabbit',zh:'兔子',cat:'动物'},
+  {id:'duck',en:'duck',zh:'鸭子',cat:'动物'},
+  {id:'cow',en:'cow',zh:'牛',cat:'动物'},
+  {id:'pig',en:'pig',zh:'猪',cat:'动物'},
+  {id:'apple',en:'apple',zh:'苹果',cat:'水果'},
+  {id:'banana',en:'banana',zh:'香蕉',cat:'水果'},
+  {id:'orange',en:'orange',zh:'橙子',cat:'水果'},
+  {id:'pear',en:'pear',zh:'梨',cat:'水果'},
+  {id:'sun',en:'sun',zh:'太阳',cat:'自然'},
+  {id:'star',en:'star',zh:'星星',cat:'自然'},
+  {id:'ball',en:'ball',zh:'球',cat:'玩具'},
+  {id:'book',en:'book',zh:'书',cat:'物品'},
+  {id:'car',en:'car',zh:'汽车',cat:'物品'},
+  {id:'red',en:'red',zh:'红色',cat:'颜色'},
+  {id:'blue',en:'blue',zh:'蓝色',cat:'颜色'},
+  {id:'yellow',en:'yellow',zh:'黄色',cat:'颜色'},
+  {id:'green',en:'green',zh:'绿色',cat:'颜色'}
+];
+function initState(){
+  let s={
+    pwd:lsGet('pwd',null),
+    bank:lsGet('bank',null),
+    learned:lsGet('learned',null),     // [{id,date}]
+    assignments:lsGet('assignments',null), // [{id,wordId,date,status:'pending'|'learned'}]
+    rewards:lsGet('rewards',null),
+    redeem:lsGet('redeem',null),       // [{id,rewardId,date,status:'pending'|'done'}]
+    settings:lsGet('settings',{wordsPerDay:5})
+  };
+  if(!s.bank){s.bank=DEFAULT_BANK.slice();}
+  if(!s.learned){s.learned=[];}
+  if(!s.rewards){s.rewards=[{id:'r1',name:'看一集动画片',cost:30},{id:'r2',name:'去公园玩一会儿',cost:50},{id:'r3',name:'贴纸一枚',cost:10}];}
+  if(!s.redeem){s.redeem=[];}
+  if(!s.assignments){
+    const d1=todayStr(-3),d2=todayStr(-2),d0=todayStr(-1),t=todayStr(0);
+    s.learned=[
+      {id:'sun',date:d1},{id:'star',date:d1},
+      {id:'ball',date:d2},{id:'book',date:d2},
+      {id:'car',date:d0}
+    ];
+    s.assignments=[
+      {id:'a1',wordId:'duck',date:d0,status:'pending'},           // 昨日未完成 → 今日逾期
+      {id:'a2',wordId:'dog',date:t,status:'pending'},
+      {id:'a3',wordId:'fish',date:t,status:'pending'},
+      {id:'a4',wordId:'bird',date:t,status:'pending'},
+      {id:'a5',wordId:'apple',date:t,status:'pending'},
+      {id:'a6',wordId:'banana',date:t,status:'pending'}
+    ];
+  }
+  return s;
+}
+let S_=initState();
+function save(){lsSet('pwd',S_.pwd);lsSet('bank',S_.bank);lsSet('learned',S_.learned);lsSet('assignments',S_.assignments);lsSet('rewards',S_.rewards);lsSet('redeem',S_.redeem);lsSet('settings',S_.settings);}
+
+/* ============ 业务逻辑 ============ */
+function bankMap(){const m={};S_.bank.forEach(w=>m[w.id]=w);return m;}
+function isLearned(id){return S_.learned.some(l=>l.id===id);}
+function ensureToday(){
+  const t=todayStr(0);
+  let todays=S_.assignments.filter(a=>a.date===t);
+  const need=S_.settings.wordsPerDay;
+  if(todays.length<need){
+    const learnedIds=S_.learned.map(l=>l.id);
+    const pendingIds=S_.assignments.map(a=>a.wordId);
+    const pool=S_.bank.map(w=>w.id).filter(id=>!learnedIds.includes(id)&&!pendingIds.includes(id));
+    let i=0;
+    while(todays.length<need && (pool.length>0 || S_.bank.length>0)){
+      let id;
+      if(pool.length>0){id=pool.shift();}
+      else{id=S_.bank[i%S_.bank.length].id;i++;}
+      const a={id:'a'+Date.now()+Math.floor(Math.random()*999),wordId:id,date:t,status:'pending'};
+      S_.assignments.push(a);todays.push(a);
+    }
+    save();
+  }
+}
+function todayTasks(){
+  ensureToday();
+  const t=todayStr(0);
+  const overdue=S_.assignments.filter(a=>a.date<t&&a.status==='pending');
+  const today=S_.assignments.filter(a=>a.date===t&&a.status==='pending');
+  return {overdue,today};
+}
+function learnWord(id){
+  if(isLearned(id))return;
+  S_.learned.push({id,date:todayStr(0)});
+  const a=S_.assignments.find(x=>x.wordId===id&&x.status==='pending');
+  if(a)a.status='learned';
+  // 积分：学会一个单词 +10
+  addPoints(10);
+  save();renderChild();toast('太棒了！+10 分 🎉');
+}
+function addPoints(n){
+  let p=lsGet('points',0);p+=n;lsSet('points',p);
+}
+function getPoints(){return lsGet('points',0);}
+
+/* ============ 视图切换 ============ */
+function showView(v){
+  document.getElementById('tabChild').classList.toggle('active',v==='child');
+  document.getElementById('tabParent').classList.toggle('active',v==='parent');
+  document.getElementById('childView').classList.toggle('hidden',v!=='child');
+  document.getElementById('parentView').classList.toggle('hidden',v!=='parent');
+  if(v==='child')renderChild();
+  else renderParentGate();
+}
+
+/* ============ 孩子模式渲染 ============ */
+let flipState={};
+function renderChild(){
+  ensureToday();
+  const {overdue,today}=todayTasks();
+  const bm=bankMap();
+  const learnedToday=S_.assignments.filter(a=>a.date===todayStr(0)&&a.status==='learned').length;
+  const total=S_.settings.wordsPerDay;
+  const pct=Math.min(1,learnedToday/total);
+  const circ=2*Math.PI*52; const off=circ*(1-pct);
+  const learnedCount=S_.learned.length;
+  const stars='⭐'.repeat(Math.floor(learnedCount/5))||'';
+  const lv=Math.floor(learnedCount/5)+1;
+
+  // 今日任务 banner
+  let banner='<div class="today-banner"><h2>'+iconTask()+' 今日学习任务</h2>';
+  if(overdue.length){
+    banner+='<div class="small" style="margin-bottom:4px;color:#EF5350;font-weight:800">昨天没做完的，今天继续哦：</div>';
+    overdue.forEach(a=>{const w=bm[a.wordId];if(w)banner+='<span class="overdue-chip"><svg viewBox="0 0 100 100" width="14" height="14"><circle cx="50" cy="50" r="40" fill="#EF5350"/></svg> '+w.zh+'（'+w.en+'）</span>';});
+  }
+  banner+='<div style="margin-top:8px"><span class="today-chip"><svg viewBox="0 0 100 100" width="14" height="14"><rect x="20" y="28" width="60" height="54" rx="10" fill="#4FC3F7"/><rect x="40" y="20" width="20" height="14" rx="4" fill="#4FC3F7"/><line x1="36" y1="46" x2="36" y2="64" stroke="#fff" stroke-width="4"/><line x1="50" y1="46" x2="50" y2="64" stroke="#fff" stroke-width="4"/><line x1="64" y1="46" x2="64" y2="64" stroke="#fff" stroke-width="4"/></svg> 今日待学 '+today.length+' 个新单词</span></div>';
+  banner+='<button class="big-btn coral" onclick="goDaily()">开始今天的学习</button></div>';
+
+  // 每日单词翻转卡
+  let cards='<div class="card-scroll" id="cardScroll">';
+  const all=[...overdue,...today];
+  all.forEach(a=>{
+    const w=bm[a.wordId];if(!w)return;
+    const done=isLearned(w.id);
+    const fid='f'+a.id;
+    cards+='<div style="flex:0 0 78%;max-width:300px"><div class="flip'+(flipState[fid]?' flipped':'')+'" id="'+fid+'" onclick="flip(\''+fid+'\')">'
+      +'<div class="flip-inner">'
+      +'<div class="face"><div class="pic">'+illusOf(w.en)+'</div><div class="zh">'+w.zh+'</div><div class="small" style="margin-top:6px;color:#90A4AE">点我翻到英文 👆</div></div>'
+      +'<div class="face back"><div class="en">'+w.en+'</div><div class="tip">中文：'+w.zh+'</div></div>'
+      +'</div></div>'
+      +'<button class="learn-btn'+(done?' done':'')+'" onclick="learnWord(\''+w.id+'\')">'+(done?'✅ 已学会':'我学会啦！')+'</button>'
+      +'</div>';
+  });
+  cards+='</div>';
+
+  // 练习
+  const practice=renderPractice();
+
+  // 闯关积分
+  const pts=getPoints();
+  let rewards='';
+  S_.rewards.forEach(r=>{
+    const can=pts>=r.cost;
+    rewards+='<div class="reward"><div class="ico">'+iconGift()+'</div><div class="info"><b>'+r.name+'</b><div>需要 '+r.cost+' 分</div></div><span class="cost">'+r.cost+'分</span><button '+(can?'':'disabled')+' onclick="redeem(\''+r.id+'\')">'+(can?'兑换':'不够')+'</button></div>';
+  });
+  const levelHTML='<div class="level-row"><div class="ring"><svg viewBox="0 0 120 120" width="120" height="120"><circle cx="60" cy="60" r="52" fill="none" stroke="#FFE0B2" stroke-width="12"/><circle cx="60" cy="60" r="52" fill="none" stroke="#66BB6A" stroke-width="12" stroke-linecap="round" stroke-dasharray="'+circ+'" stroke-dashoffset="'+off+'"/></svg><div class="pct"><b>'+learnedToday+'/'+total+'</b><span>今日进度</span></div></div>'
+    +'<div class="stat"><div class="pts">'+pts+' 分</div><div class="lvl">已学 '+learnedCount+' 个单词 · 第 '+lv+' 关</div><div class="stars">'+(stars||'🌟 加油')+'</div></div></div>';
+
+  let backupTip='';
+  if(S_.learned.length>=30){backupTip='<div class="warn">数据已积累 '+S_.learned.length+' 条，建议到「家长模式」导出备份哦～</div>';}
+
+  document.getElementById('childView').innerHTML=
+    banner+backupTip
+    +'<div class="section-title">'+iconBook()+' 每日单词卡（点卡片翻面）</div>'+cards
+    +'<div class="section-title">'+iconGame()+' 组词练习 · 看图选词</div>'+practice
+    +'<div class="section-title">'+iconTrophy()+' 闯关与积分</div>'+levelHTML+rewards;
+}
+function goDaily(){const el=document.getElementById('cardScroll');if(el)el.scrollIntoView({behavior:'smooth',block:'center'});}
+function flip(fid){flipState[fid]=!flipState[fid];const el=document.getElementById(fid);if(el)el.classList.toggle('flipped');}
+
+/* ---- 练习游戏 ---- */
+let quiz={idx:0,opts:[],correct:null,answered:false};
+function buildQuiz(){
+  ensureToday();
+  const {overdue,today}=todayTasks();
+  const bm=bankMap();
+  const words=[...overdue,...today].map(a=>bm[a.wordId]).filter(Boolean);
+  const list=words.length?words:S_.bank.slice(0,5);
+  quiz.idx=0;quiz.list=list;quiz.answered=false;
+}
+function renderPractice(){
+  if(!quiz.list||!quiz.list.length)buildQuiz();
+  if(quiz.idx>=quiz.list.length){
+    return '<div class="quiz-card" style="text-align:center"><div style="font-size:40px">🏆</div><div style="font-size:20px;font-weight:800;margin:10px 0">练习完成啦！你真厉害</div><button class="big-btn sky" onclick="buildQuiz();renderChild();">再练一次 🔄</button></div>';
+  }
+  const w=quiz.list[quiz.idx];
+  // 选2个干扰项
+  const others=S_.bank.filter(b=>b.id!==w.id).map(b=>b.en);
+  const shuffled=others.sort(()=>Math.random()-0.5).slice(0,2);
+  const opts=[w.en,...shuffled].sort(()=>Math.random()-0.5);
+  quiz.opts=opts;quiz.correct=w.en;quiz.answered=false;
+  let html='<div class="quiz-card"><div class="quiz-q">第 '+(quiz.idx+1)+' / '+quiz.list.length+' 题：这个图是什么？</div>'
+    +'<div class="quiz-pic">'+illusOf(w.en)+'</div>'
+    +'<div class="opt-row" id="optRow">';
+  opts.forEach(o=>{html+='<button class="opt" onclick="answer(\''+o+'\',this)">'+o+'</button>';});
+  html+='</div><div class="feedback" id="fb"></div></div>';
+  return html;
+}
+function answer(en,btn){
+  if(quiz.answered)return;
+  const fb=document.getElementById('fb');
+  if(en===quiz.correct){
+    quiz.answered=true;btn.classList.add('right');
+    addPoints(2);
+    fb.style.color='#66BB6A';fb.textContent='答对啦！+2 分 🎉';
+    document.querySelectorAll('#optRow .opt').forEach(b=>b.disabled=true);
+    setTimeout(()=>{quiz.idx++;renderChild();},900);
+  }else{
+    btn.classList.add('wrong');btn.disabled=true;
+    fb.style.color='#EF5350';fb.textContent='再想想看～';
+  }
+}
+function redeem(rid){
+  const r=S_.rewards.find(x=>x.id===rid);if(!r)return;
+  if(getPoints()<r.cost){toast('积分不够哦');return;}
+  S_.redeem.push({id:'rd'+Date.now(),rewardId:rid,date:todayStr(0),status:'pending'});
+  save();renderChild();toast('已申请兑换，等爸爸妈妈确认 ❤️');
+}
+
+/* ============ 家长模式（密码门 + 面板） ============ */
+let parentUnlocked=false;
+function renderParentGate(){
+  const v=document.getElementById('parentView');
+  if(!S_.pwd){
+    v.innerHTML='<div class="panel"><h3>'+iconLock()+' 设置家长密码</h3><p class="small">首次使用请设置 4 位数字密码，用于进入家长模式（仅防误操作，不是真加密）。</p>'
+      +'<label>输入 4 位数字密码</label><input id="newPwd" type="password" inputmode="numeric" maxlength="4" placeholder="如 1234">'
+      +'<button class="big-btn" style="margin-top:14px" onclick="setPwd()">确定设置</button></div>';
+    return;
+  }
+  if(!parentUnlocked){
+    v.innerHTML='<div class="panel"><h3>'+iconLock()+' 家长验证</h3><p class="small">请输入 4 位家长密码进入。</p>'
+      +'<label>密码</label><input id="pwdIn" type="password" inputmode="numeric" maxlength="4" placeholder="****">'
+      +'<button class="big-btn" style="margin-top:14px" onclick="checkPwd()">进入家长模式</button>'
+      +'<button class="mini-btn ghost" style="width:100%;margin-top:10px" onclick="forgetPwd()">忘记密码？</button></div>';
+    return;
+  }
+  renderParent();
+}
+function setPwd(){
+  const p=document.getElementById('newPwd').value.trim();
+  if(!/^\d{4}$/.test(p)){toast('请输入4位数字');return;}
+  S_.pwd=p;save();parentUnlocked=true;renderParent();toast('密码已设置');
+}
+function checkPwd(){
+  const p=document.getElementById('pwdIn').value.trim();
+  if(p===S_.pwd){parentUnlocked=true;renderParent();}
+  else toast('密码不正确');
+}
+function forgetPwd(){
+  if(confirm('忘记密码将清空全部数据并重置，确定继续？')){
+    ['pwd','bank','learned','assignments','rewards','redeem','points','settings'].forEach(k=>localStorage.removeItem(PREFIX+k));
+    S_=initState();save();parentUnlocked=false;renderParentGate();toast('已重置');
+  }
+}
+function renderParent(){
+  const bm=bankMap();
+  // 数据备份按钮（首屏显眼）
+  let backup='<div class="panel"><h3>'+iconBackup()+' 数据备份与恢复</h3>'
+    +'<div class="data-btns">'
+    +'<button class="mini-btn green" onclick="exportJSON()">导出 JSON 备份</button>'
+    +'<button class="mini-btn" onclick="importJSON()">导入恢复</button></div>'
+    +'<input type="file" id="fileIn" accept="application/json" class="hidden" onchange="doImport(event)">'
+    +'<div class="small" style="margin-top:10px">数据都存在本机浏览器，建议定期导出备份。导入不限条数。</div></div>';
+
+  // 进度图表
+  const days=[todayStr(-6),todayStr(-5),todayStr(-4),todayStr(-3),todayStr(-2),todayStr(-1),todayStr(0)];
+  const counts=days.map(d=>S_.learned.filter(l=>l.date===d).length);
+  const maxc=Math.max(1,...counts);
+  let bars='';
+  days.forEach((d,i)=>{const h=Math.round(counts[i]/maxc*100);bars+='<div class="bar" style="height:'+h+'%"><span>'+(i===6?'今':(d.slice(5)))+'</span></div>';});
+  let chart='<div class="panel"><h3>'+iconChart()+' 最近7天学习量</h3><div class="bar-row">'+bars+'</div>'
+    +'<div class="small">累计学会 '+S_.learned.length+' 个单词 · 总积分 '+getPoints()+' 分</div></div>';
+
+  // 待确认兑换
+  let pend='<div class="panel"><h3>'+iconGift()+' 兑换确认</h3>';
+  const pending=S_.redeem.filter(r=>r.status==='pending');
+  if(!pending.length)pend+='<div class="small">暂无待确认兑换。</div>';
+  pending.forEach(rd=>{const r=S_.rewards.find(x=>x.id===rd.rewardId);if(!r)return;
+    pend+='<div class="redeem-item"><div class="info">宝宝申请：<b>'+r.name+'</b><br><span class="small">'+rd.date+'</span></div>'
+      +'<button onclick="confirmRedeem(\''+rd.id+'\')">确认</button>'
+      +'<button class="no" onclick="cancelRedeem(\''+rd.id+'\')">拒绝</button></div>';});
+  pend+='</div>';
+
+  // 管理单词
+  let wordMgr='<div class="panel"><h3>'+iconBook()+' 单词库管理（'+S_.bank.length+' 个）</h3>'
+    +'<div class="row"><input id="wEn" placeholder="英文，如 tiger"><input id="wZh" placeholder="中文，如 老虎" style="max-width:140px"></div>'
+    +'<div class="row"><select id="wCat"><option>动物</option><option>水果</option><option>自然</option><option>玩具</option><option>物品</option><option>颜色</option><option>其他</option></select>'
+    +'<button class="mini-btn green" onclick="addWord()">添加单词</button></div>'
+    +'<div class="small">自定义单词无插图时会显示首字母色块，不影响学习。</div></div>';
+
+  // 管理奖励
+  let rewMgr='<div class="panel"><h3>'+iconGift()+' 奖励管理</h3>'
+    +'<div class="row"><input id="rName" placeholder="奖励名称，如 吃冰淇淋"><input id="rCost" type="number" placeholder="所需分数" style="max-width:120px"></div>'
+    +'<button class="mini-btn" onclick="addReward()">添加奖励</button>'
+    +'<div style="margin-top:12px">';
+  S_.rewards.forEach(r=>{rewMgr+='<div class="row" style="justify-content:space-between"><span>'+r.name+'（'+r.cost+'分）</span><button class="mini-btn coral" onclick="delReward(\''+r.id+'\')">删除</button></div>';});
+  rewMgr+='</div></div>';
+
+  // 清空
+  let clear='<div class="panel"><h3>'+iconTrash()+' 清空数据</h3>'
+    +'<button class="mini-btn ghost" style="width:100%" onclick="clearSample()">清空示例进度（保留单词库与奖励）</button>'
+    +'<div class="danger"><p class="small" style="color:#EF5350">以下操作不可恢复，会删除全部学习与积分数据：</p>'
+    +'<button class="mini-btn coral" style="width:100%" onclick="clearAll()">清空全部数据</button></div></div>';
+
+  document.getElementById('parentView').innerHTML=backup+chart+pend+wordMgr+rewMgr+clear;
+}
+function addWord(){
+  const en=document.getElementById('wEn').value.trim();const zh=document.getElementById('wZh').value.trim();
+  if(!en||!zh){toast('请填英文和中文');return;}
+  const id=en.toLowerCase().replace(/[^a-z0-9]/g,'');
+  if(S_.bank.some(w=>w.id===id)){toast('单词已存在');return;}
+  S_.bank.push({id,en,zh,cat:document.getElementById('wCat').value});save();renderParent();toast('已添加');
+}
+function addReward(){
+  const name=document.getElementById('rName').value.trim();const cost=parseInt(document.getElementById('rCost').value);
+  if(!name||!cost){toast('请填名称和分数');return;}
+  S_.rewards.push({id:'r'+Date.now(),name,cost});save();renderParent();toast('已添加奖励');
+}
+function delReward(id){S_.rewards=S_.rewards.filter(r=>r.id!==id);save();renderParent();}
+function confirmRedeem(id){const rd=S_.redeem.find(r=>r.id===id);if(!rd)return;rd.status='done';const r=S_.rewards.find(x=>x.id===rd.rewardId);if(r){let p=getPoints();if(p>=r.cost)lsSet('points',p-r.cost);}save();renderParent();toast('已确认，宝宝好开心！');}
+function cancelRedeem(id){S_.redeem=S_.redeem.filter(r=>r.id!==id);save();renderParent();}
+function clearSample(){
+  if(!confirm('确定清空学习进度（已学单词、今日任务、兑换申请）？单词库和奖励会保留。'))return;
+  S_.learned=[];S_.assignments=[];S_.redeem=[];lsSet('points',0);save();renderParent();toast('示例进度已清空');
+}
+function clearAll(){
+  if(!confirm('⚠️ 此操作不可恢复！将删除全部数据（单词库、进度、积分、奖励）。确定？'))return;
+  if(!confirm('再次确认：所有数据将被永久删除，无法找回。继续？'))return;
+  ['pwd','bank','learned','assignments','rewards','redeem','points','settings'].forEach(k=>localStorage.removeItem(PREFIX+k));
+  S_=initState();save();parentUnlocked=false;showView('child');toast('已全部清空');
+}
+
+/* 导入导出 */
+function exportJSON(){
+  const data={bank:S_.bank,learned:S_.learned,assignments:S_.assignments,rewards:S_.rewards,redeem:S_.redeem,points:getPoints(),settings:S_.settings,exportedAt:new Date().toISOString()};
+  const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='宝宝英语启蒙台-备份.json';a.click();
+  setTimeout(()=>URL.revokeObjectURL(a.href),2000);toast('已导出备份');
+}
+function importJSON(){document.getElementById('fileIn').click();}
+function doImport(e){
+  const f=e.target.files[0];if(!f)return;
+  const rd=new FileReader();
+  rd.onload=()=>{
+    try{
+      const d=JSON.parse(rd.result);
+      if(d.bank)S_.bank=d.bank;
+      if(d.learned)S_.learned=d.learned;
+      if(d.assignments)S_.assignments=d.assignments;
+      if(d.rewards)S_.rewards=d.rewards;
+      if(d.redeem)S_.redeem=d.redeem;
+      if(typeof d.points==='number')lsSet('points',d.points);
+      if(d.settings)S_.settings=d.settings;
+      save();renderParent();toast('导入成功，数据已恢复');
+    }catch(err){toast('文件格式有误');}
+  };
+  rd.readAsText(f);
+}
+
+/* ============ 内联图标 ============ */
+function iconTask(){return S('<circle cx="50" cy="50" r="42" fill="#FF8A65"/><path d="M34 52 l11 11 22 -24" stroke="#fff" stroke-width="8" fill="none" stroke-linecap="round" stroke-linejoin="round"/>');}
+function iconBook(){return S('<rect x="20" y="26" width="60" height="48" rx="8" fill="#4FC3F7"/><line x1="50" y1="26" x2="50" y2="74" stroke="#fff" stroke-width="5"/><line x1="30" y1="40" x2="44" y2="40" stroke="#fff" stroke-width="4"/><line x1="56" y1="40" x2="70" y2="40" stroke="#fff" stroke-width="4"/>');}
+function iconGame(){return S('<circle cx="50" cy="50" r="40" fill="#BA68C8"/><polygon points="42,34 42,66 68,50" fill="#fff"/>');}
+function iconTrophy(){return S('<path d="M34 24 h32 v10 a16 16 0 0 1 -32 0 Z" fill="#FFD54F"/><path d="M34 28 q-12 2 -12 14" stroke="#FFB300" stroke-width="4" fill="none"/><path d="M66 28 q12 2 12 14" stroke="#FFB300" stroke-width="4" fill="none"/><rect x="44" y="48" width="12" height="14" fill="#FFB300"/><rect x="36" y="62" width="28" height="8" rx="3" fill="#FFB300"/>');}
+function iconLock(){return S('<rect x="26" y="46" width="48" height="38" rx="8" fill="#90A4AE"/><path d="M34 46 v-8 a16 16 0 0 1 32 0 v8" stroke="#607D8B" stroke-width="6" fill="none"/><circle cx="50" cy="62" r="5" fill="#fff"/><rect x="47" y="64" width="6" height="10" fill="#fff"/>');}
+function iconGift(){return S('<rect x="24" y="44" width="52" height="36" rx="6" fill="#EF5350"/><rect x="20" y="36" width="60" height="12" rx="4" fill="#E53935"/><rect x="46" y="36" width="8" height="44" fill="#FFCDD2"/><path d="M50 36 q-14 -16 -22 -4 q-6 10 22 4" fill="#FF8A65"/><path d="M50 36 q14 -16 22 -4 q6 10 -22 4" fill="#FF8A65"/>');}
+function iconBackup(){return S('<path d="M50 22 a28 28 0 1 1 -20 8" stroke="#66BB6A" stroke-width="7" fill="none" stroke-linecap="round"/><polygon points="30,14 30,34 46,24" fill="#66BB6A"/>');}
+function iconChart(){return S('<rect x="22" y="22" width="56" height="56" rx="6" fill="#4FC3F7"/><rect x="30" y="50" width="10" height="18" fill="#fff"/><rect x="45" y="40" width="10" height="28" fill="#fff"/><rect x="60" y="32" width="10" height="36" fill="#fff"/>');}
+function iconTrash(){return S('<rect x="28" y="36" width="44" height="44" rx="6" fill="#EF5350"/><rect x="22" y="28" width="56" height="10" rx="4" fill="#E53935"/><line x1="40" y1="48" x2="40" y2="72" stroke="#fff" stroke-width="4"/><line x1="50" y1="48" x2="50" y2="72" stroke="#fff" stroke-width="4"/><line x1="60" y1="48" x2="60" y2="72" stroke="#fff" stroke-width="4"/>');}
+
+/* ============ 启动 ============ */
+renderChild();
+</script>
+</body>
+</html>
